@@ -1,0 +1,7 @@
+.vs/
+[Dd]ebug/
+x64/
+x86/
+
+*.sln
+*.vcxproj*
