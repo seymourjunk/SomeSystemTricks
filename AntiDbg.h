@@ -1,5 +1,6 @@
 #pragma once
 #include "Helper.h"
+#include "ProcessHelper.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -19,6 +20,6 @@ BOOL CheckHeapFlags();									// PEB!ProcessHeap
 BOOL RunCheckRemoteDebuggerPresent();					// run existing WinApi functions and return result
 BOOL RunNtQueryInformationProcess_DebugPort();			// use NtQueryInformationProcess() Win32 API function
 BOOL RunNtQueryInformationProcess_DebugFlags();			// use NtQueryInformationProcess() Win32 API function
-BOOL RunNtQueryInformationProcess_DebugObjectHandle();			// use NtQueryInformationProcess() Win32 API function
+BOOL RunNtQueryInformationProcess_DebugObjectHandle();	// use NtQueryInformationProcess() Win32 API function
 void RunAllDbgChecks();
 
