@@ -29,7 +29,7 @@ BOOL GetProcessList()
     }
 
     processEntry.dwSize = sizeof(PROCESSENTRY32);
-    if (!::Process32First(hSnapProcess, &processEntry)) // first process
+    if (!::Process32First(hSnapProcess, &processEntry))
     {
         printf("ERROR: Process32First()\n");
         ShowError(GetLastError());
@@ -41,10 +41,45 @@ BOOL GetProcessList()
     printf("====================================\n");
     do
     {
-        printf("  %-8d \t  %ws  \n", processEntry.th32ProcessID, processEntry.szExeFile);
+        printf("  %-8u \t  %ws  \n", processEntry.th32ProcessID, processEntry.szExeFile);
 
     } while (::Process32Next(hSnapProcess, &processEntry));
 
     CloseHandle(hSnapProcess);
     return TRUE;
+}
+
+std::wstring GetProcessNameByPID(DWORD pid)
+{
+    std::wstring processName = L"";
+    HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+    PROCESSENTRY32 processEntry;
+
+    if (hSnapProcess == INVALID_HANDLE_VALUE)
+    {
+        printf("ERROR: handle create error\n");
+        ShowError(GetLastError());
+        return processName;
+    }
+
+    processEntry.dwSize = sizeof(PROCESSENTRY32);
+    if (!::Process32First(hSnapProcess, &processEntry))
+    {
+        printf("ERROR: Process32First()\n");
+        ShowError(GetLastError());
+        CloseHandle(hSnapProcess);
+        return processName;
+    }
+    do
+    {
+        if (pid == processEntry.th32ProcessID)
+        {
+            processName = processEntry.szExeFile;
+            break;
+        }
+
+    } while (::Process32Next(hSnapProcess, &processEntry));
+
+    CloseHandle(hSnapProcess);
+    return processName;
 }

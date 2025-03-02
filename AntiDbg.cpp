@@ -83,9 +83,9 @@ BOOL RunNtQueryInformationProcess_DebugPort()
 
 			NTSTATUS status = NtQueryInfoProcess(GetCurrentProcess(), ProcessDebugPort, &dwProcessDebugPort, sizeof(DWORD_PTR), NULL);
 
-			printf("NtQueryInformationProcess DebugPort return: %d\n", dwProcessDebugPort);  // TODO: verbose log level
 			if (NT_SUCCESS(status))
 			{
+				printf("NtQueryInformationProcess DebugPort return: %d\n", (DWORD)dwProcessDebugPort);  // TODO: verbose log level
 				if (dwProcessDebugPort != 0)
 					return TRUE;
 				else
@@ -115,9 +115,9 @@ BOOL RunNtQueryInformationProcess_DebugFlags()
 			const DWORD ProcessDebugFlags = 0x1f;
 			NTSTATUS status = NtQueryInfoProcess(GetCurrentProcess(), ProcessDebugFlags, &dwNoDebugInherit, sizeof(DWORD), NULL);
 
-			printf("NtQueryInformationProcess DebugFlags return: %d\n", dwNoDebugInherit);  // TODO: verbose log level
 			if (NT_SUCCESS(status))
 			{
+				printf("NtQueryInformationProcess DebugFlags return: %d\n", dwNoDebugInherit);  // TODO: verbose log level
 				if (dwNoDebugInherit == 0)
 					return TRUE;
 				else
@@ -143,17 +143,18 @@ BOOL RunNtQueryInformationProcess_DebugObjectHandle()
 
 		if (NtQueryInfoProcess)
 		{
-			HANDLE hProcessDebugObject = NULL;
+			HANDLE hProcessDebugObject = nullptr;
 			const DWORD ProcessDebugObjectHandle = 0x1e;
 			NTSTATUS status = NtQueryInfoProcess(GetCurrentProcess(), ProcessDebugObjectHandle, &hProcessDebugObject, sizeof(HANDLE), NULL);
 
-			printf("NtQueryInformationProcess DebugFlags return: 0x%x\n", hProcessDebugObject);  // TODO: verbose log level
 			if (NT_SUCCESS(status))
 			{
+				printf("NtQueryInformationProcess DebugObjectHandle return: 0x%x\n", hProcessDebugObject);  // TODO: verbose log level
 				if (hProcessDebugObject != 0)
+				{
+					CloseHandle(hProcessDebugObject);
 					return TRUE;
-				else
-					return FALSE;
+				}
 			}
 			else
 			{
@@ -162,6 +163,34 @@ BOOL RunNtQueryInformationProcess_DebugObjectHandle()
 			}
 		}
 	}
+	
+	return FALSE;
+}
+
+BOOL PrintParentProcessIdAndName()
+{
+	HMODULE hNtDll = ::LoadLibrary(L"ntdll.dll");
+
+	if (hNtDll)
+	{
+		PNtQueryInformationProcess NtQueryInfoProcess = (PNtQueryInformationProcess)GetProcAddress(hNtDll, "NtQueryInformationProcess");
+		if (NtQueryInfoProcess)
+		{
+			newPROCESS_BASIC_INFORMATION processInfo;
+			NTSTATUS status = NtQueryInfoProcess(GetCurrentProcess(), ProcessBasicInformation, &processInfo, sizeof(newPROCESS_BASIC_INFORMATION), NULL);
+
+			if (NT_SUCCESS(status))
+			{
+				printf("Parent Process: %d\t %ls\n", (DWORD)processInfo.InheritedFromUniqueProcessId, GetProcessNameByPID(processInfo.InheritedFromUniqueProcessId).c_str());
+				return TRUE;
+			}
+			else {
+				printf("NT_STATUS isn't STATUS_SUCCESS (0x00000000), but 0x%x: ", status);
+				GetNtStatusCode(status);
+			}
+		}
+	}
+
 	return FALSE;
 }
 

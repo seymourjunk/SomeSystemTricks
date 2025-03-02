@@ -7,4 +7,4 @@
 
 BOOL KillProcessByPID(DWORD pid);
 BOOL GetProcessList();
-LPTSTR GetParentProcessName();
+std::wstring GetProcessNameByPID(DWORD pid);
