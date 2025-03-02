@@ -9,6 +9,7 @@ Common anti-debug techniques:
 - IsDebuggerPresent() (WinAPI)
 - CheckRemoteDebuggerPresent() (WinAPI)
 - NtQueryInformationProcess() (WinAPI): ProcessDebugPort, ProcessDebugFlags, ProcessDebugObjectHandle
+- Get the name and ID of the parent process (PROCESS_BASIC_INFORMATION!InheritedFromUniqueProcessId)
 
 
 ##### SingleInstance
