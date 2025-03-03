@@ -194,6 +194,25 @@ BOOL PrintParentProcessIdAndName()
 	return FALSE;
 }
 
+#ifdef _WIN64
+#pragma comment(linker, "/include:_tls_used")	// say the linker to create the TLS directory
+#else
+#pragma comment(linker, "/include:__tls_used")
+#endif
+#pragma section(".CRT$XLY", long, read)			// create a new section
+void WINAPI TlsCallback(PVOID, DWORD, PVOID)
+{
+	if (IsDebuggerPresent())
+	{
+		printf("From TLS callback: process is running in a debugger\n");
+		exit(-1);
+	}
+}
+
+__declspec(allocate(".CRT$XLY")) PIMAGE_TLS_CALLBACK tlsCallbackFunc = TlsCallback;	// tells the compiler that a particular variable is to be placed 
+																					// in a specific section in the final executable
+
+
 void RunAllDbgChecks()
 {
 	// if (CheckIsBeingDebugged() | CheckNtGlobalFlag() | CheckHeapFlags() | RunCheckRemoteDebuggerPresentWin32API() | RunNtQueryInformationProcessWin32API_DebugPort())
