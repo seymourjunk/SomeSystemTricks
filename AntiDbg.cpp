@@ -209,9 +209,27 @@ void WINAPI TlsCallback(PVOID, DWORD, PVOID)
 	}
 }
 
-__declspec(allocate(".CRT$XLY")) PIMAGE_TLS_CALLBACK tlsCallbackFunc = TlsCallback;	// tells the compiler that a particular variable is to be placed 
+//__declspec(allocate(".CRT$XLY")) PIMAGE_TLS_CALLBACK tlsCallbackFunc = TlsCallback;	// tells the compiler that a particular variable is to be placed 
 																					// in a specific section in the final executable
 
+BOOL CheckHardwareBreakpoints()
+{
+	CONTEXT context = {};
+	context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+
+	if (GetThreadContext(GetCurrentThread(), &context))
+	{
+		printf("Debug registers: DR0 = 0x%llx, DR1 = 0x%llx, DR2 = 0x%llx, DR3 = 0x%llx\n", context.Dr0, context.Dr1, context.Dr2, context.Dr3);
+		return (context.Dr0 || context.Dr1 || context.Dr2 || context.Dr3);
+	}
+	else
+	{
+		printf("ERROR: GetThreadContext()\n");
+		ShowError(GetLastError());
+	}
+	
+	return FALSE;
+}
 
 void RunAllDbgChecks()
 {
