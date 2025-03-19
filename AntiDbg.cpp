@@ -1,11 +1,18 @@
 #include "AntiDbg.h"
 
 typedef NTSTATUS(WINAPI* PNtQueryInformationProcess)(
-	IN	HANDLE				ProcessHandle,
-	IN	DWORD				ProcessInformationClass,
-	OUT	PVOID				ProcessInformation,
-	IN	ULONG				ProcessInformationLength,
-	OUT	PULONG				ReturnLength
+	IN	HANDLE			ProcessHandle,
+	IN	DWORD			ProcessInformationClass,
+	OUT	PVOID			ProcessInformation,
+	IN	ULONG			ProcessInformationLength,
+	OUT	PULONG			ReturnLength
+	);
+
+typedef NTSTATUS(WINAPI* PNtSetInformationThread)(
+	IN	HANDLE			ThreadHandle,
+	IN	ULONG			ThreaInformationClass,
+	IN	PVOID			ThreadInformation,
+	IN	ULONG			ThreadInformationLength
 	);
 
 PVOID GetPEB()
@@ -228,6 +235,34 @@ BOOL CheckHardwareBreakpoints()
 		ShowError(GetLastError());
 	}
 	
+	return FALSE;
+}
+
+BOOL SetInformationThread()	
+{
+	HMODULE hNtDll = ::LoadLibrary(L"ntdll.dll");
+
+	if (hNtDll)
+	{
+		PNtSetInformationThread NtSetInfoThread = (PNtSetInformationThread)GetProcAddress(hNtDll, "NtSetInformationThread");
+
+		if (NtSetInfoThread)
+		{
+			const ULONG ThreadHideFromDebugger = 0x11;
+			NTSTATUS status = NtSetInfoThread(GetCurrentThread(), ThreadHideFromDebugger, NULL, 0); // debugger will not receive any events after that
+
+			if (NT_SUCCESS(status))
+			{
+				printf("ThreadHideFromDebugger is set\n");
+				return TRUE;
+			}
+			else
+			{
+				printf("NT_STATUS isn't STATUS_SUCCESS (0x00000000), but 0x%x: ", status);
+				GetNtStatusCode(status);
+			}
+		}		
+	}
 	return FALSE;
 }
 

@@ -28,6 +28,7 @@ BOOL RunCheckRemoteDebuggerPresent();					// run existing WinApi functions and r
 BOOL RunNtQueryInformationProcess_DebugPort();			// use NtQueryInformationProcess() Win32 API function
 BOOL RunNtQueryInformationProcess_DebugFlags();
 BOOL RunNtQueryInformationProcess_DebugObjectHandle();
+BOOL SetInformationThread();
 BOOL CheckHardwareBreakpoints();						// check DR0-DR3 registers
 BOOL PrintParentProcessIdAndName();
 void RunAllDbgChecks();
