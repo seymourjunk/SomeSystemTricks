@@ -10,6 +10,12 @@
 #define FLG_HEAP_ENABLE_FREE_CHECK		0x20
 #define FLG_HEAP_VALIDATE_PARAMETERS	0x40
 #define NT_GLOBAL_FLAG_DBG (FLG_HEAP_ENABLE_TAIL_CHECK | FLG_HEAP_ENABLE_FREE_CHECK | FLG_HEAP_VALIDATE_PARAMETERS)
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER 0x00000004
+#define NtCurrentProcess() ( (HANDLE)(LONG_PTR) -1 ) 
+#define NtCurrentThread() ((HANDLE)(LONG_PTR)-2)
+
+
+const ULONG ThreadHideFromDebugger = 0x11;
 
 typedef struct _newPROCESS_BASIC_INFORMATION {
 	NTSTATUS ExitStatus;
@@ -28,8 +34,10 @@ BOOL RunCheckRemoteDebuggerPresent();					// run existing WinApi functions and r
 BOOL RunNtQueryInformationProcess_DebugPort();			// use NtQueryInformationProcess() Win32 API function
 BOOL RunNtQueryInformationProcess_DebugFlags();
 BOOL RunNtQueryInformationProcess_DebugObjectHandle();
-BOOL SetInformationThread();
-BOOL CheckHardwareBreakpoints();						// check DR0-DR3 registers
 BOOL PrintParentProcessIdAndName();
+BOOL CheckHardwareBreakpoints();						// check DR0-DR3 registers
+BOOL SetInformationThread();
+void CreateThreadWithHideFromDebuggerFlag();			// code could be executed in the thread with hide from debugger flag
+BOOL CheckThreadDebugFlag();
 void RunAllDbgChecks();
 

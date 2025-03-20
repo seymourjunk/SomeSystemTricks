@@ -15,6 +15,28 @@ typedef NTSTATUS(WINAPI* PNtSetInformationThread)(
 	IN	ULONG			ThreadInformationLength
 	);
 
+typedef NTSTATUS(WINAPI* PNtCreateThreadEx)(
+	OUT			PHANDLE				ThreadHandle,
+	IN			ACCESS_MASK			DesireAccess,
+	IN OPTIONAL	POBJECT_ATTRIBUTES	ObjectAttributes,
+	IN			HANDLE				ProcessHandle,
+	IN			PVOID				StartRoutine,
+	IN OPTIONAL	PVOID				Argument,
+	IN			ULONG				CreateFlags,
+	IN OPTIONAL	ULONG_PTR			ZeroBits,
+	IN OPTIONAL	SIZE_T				StackSize,
+	IN OPTIONAL	SIZE_T				MaximumStackSize,
+	IN OPTIONAL	PVOID				AttributeList
+	);
+
+typedef NTSTATUS(WINAPI* PNtQueryInformationThread)(
+	IN				HANDLE	ThreadHandle,
+	IN				ULONG	ThreadInformationClass,
+	IN OPTIONAL		PVOID	ThreadInformation,
+	IN				ULONG	ThreadInformationLength,
+	OUT OPTIONAL	PULONG	ReturnLength
+	);
+
 PVOID GetPEB()
 {
 #ifdef _WIN64
@@ -248,7 +270,6 @@ BOOL SetInformationThread()
 
 		if (NtSetInfoThread)
 		{
-			const ULONG ThreadHideFromDebugger = 0x11;
 			NTSTATUS status = NtSetInfoThread(GetCurrentThread(), ThreadHideFromDebugger, NULL, 0); // debugger will not receive any events after that
 
 			if (NT_SUCCESS(status))
@@ -262,6 +283,62 @@ BOOL SetInformationThread()
 				GetNtStatusCode(status);
 			}
 		}		
+	}
+	return FALSE;
+}
+
+void CreateThreadWithHideFromDebuggerFlag()
+{
+	HMODULE hNtDll = ::LoadLibrary(L"ntdll.dll");
+
+	if (hNtDll)
+	{
+		HANDLE hThread = 0;
+		PNtCreateThreadEx NtCreateThread = (PNtCreateThreadEx)GetProcAddress(hNtDll, "NtCreateThreadEx");
+
+		if (NtCreateThread)
+		{
+			NTSTATUS status = NtCreateThread(&hThread, THREAD_ALL_ACCESS, 0, NtCurrentProcess(), (LPTHREAD_START_ROUTINE)CheckThreadDebugFlag, 0, THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER, 0, 0, 0, 0);
+			if (NT_SUCCESS(status))
+			{
+				printf("A new thread [%d] with THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER flag was created\n", GetThreadId(hThread));
+				WaitForSingleObject(hThread, INFINITE); // TODO
+			}
+			else
+			{
+				printf("NT_STATUS isn't STATUS_SUCCESS (0x00000000), but 0x%x: ", status);
+				GetNtStatusCode(status);
+			}
+		}
+	}
+}
+
+BOOL CheckThreadDebugFlag()
+{
+	HMODULE hNtDll = ::LoadLibrary(L"ntdll.dll");
+
+	if (hNtDll)
+	{
+		BOOLEAN result = FALSE;
+		PNtQueryInformationThread NtQueryInfoThread = (PNtQueryInformationThread)GetProcAddress(hNtDll, "NtQueryInformationThread");
+
+		if (NtQueryInfoThread)
+		{
+			NTSTATUS status = NtQueryInfoThread(NtCurrentThread(), ThreadHideFromDebugger, &result, sizeof(result), 0);
+
+			if (NT_SUCCESS(status))
+			{
+				if (result) printf("ThreadHideFromDebugger flag set for current thread [%d]\n", GetCurrentThreadId());
+				else printf("ThreadHideFromDebugger flag is not set for current thread [%d]\n", GetCurrentThreadId());
+				return FALSE;
+			}
+			else
+			{
+				printf("NT_STATUS isn't STATUS_SUCCESS (0x00000000), but 0x%x: ", status);
+				GetNtStatusCode(status);
+			}
+
+		}
 	}
 	return FALSE;
 }
