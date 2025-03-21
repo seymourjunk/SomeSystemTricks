@@ -49,7 +49,7 @@ BOOL GetProcessList()
     return TRUE;
 }
 
-std::wstring GetProcessNameByPID(DWORD pid)
+std::wstring GetProcessNameById(DWORD pid)
 {
     std::wstring processName = L"";
     HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
@@ -82,4 +82,40 @@ std::wstring GetProcessNameByPID(DWORD pid)
 
     CloseHandle(hSnapProcess);
     return processName;
+}
+
+DWORD GetProcessIdByName(std::wstring processName)
+{
+    DWORD pid = -1;
+    HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+    PROCESSENTRY32 processEntry;
+
+    if (hSnapProcess == INVALID_HANDLE_VALUE)
+    {
+        printf("ERROR: handle create error\n");
+        ShowError(GetLastError());
+        return pid;
+    }
+
+    processEntry.dwSize = sizeof(PROCESSENTRY32);
+    if (!::Process32First(hSnapProcess, &processEntry))
+    {
+        printf("ERROR: Process32First()\n");
+        ShowError(GetLastError());
+        CloseHandle(hSnapProcess);
+        return pid;
+    }
+    do
+    {
+        if (processName == processEntry.szExeFile)
+        {
+            pid = processEntry.th32ProcessID;
+            break;
+        }
+
+    } while (::Process32Next(hSnapProcess, &processEntry));
+
+    CloseHandle(hSnapProcess);
+    return pid;
 }

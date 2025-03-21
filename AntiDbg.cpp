@@ -210,7 +210,14 @@ BOOL PrintParentProcessIdAndName()
 
 			if (NT_SUCCESS(status))
 			{
-				printf("Parent Process: %d\t %ls\n", (DWORD)processInfo.InheritedFromUniqueProcessId, GetProcessNameByPID(processInfo.InheritedFromUniqueProcessId).c_str());
+				std::wstring processName = GetProcessNameById(processInfo.InheritedFromUniqueProcessId);
+				if (processName == L"")
+				{
+					printf("[ERROR] Process name by id was not found \n");
+					return FALSE;
+				}
+
+				printf("Parent Process: %d\t %ls\n", (DWORD)processInfo.InheritedFromUniqueProcessId, processName.c_str());
 				return TRUE;
 			}
 			else {
@@ -340,6 +347,27 @@ BOOL CheckThreadDebugFlag()
 
 		}
 	}
+	return FALSE;
+}
+
+BOOL CheckSeDebugPrivilegeOfProcess()
+{
+	// see if we can open system process
+	DWORD pidSystemProcess = GetProcessIdByName(L"csrss.exe");
+	if (pidSystemProcess == -1)
+	{
+		printf("[ERROR] Process id by name was not found \n");
+		return FALSE;
+	}
+
+	HANDLE hDebug = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pidSystemProcess);
+	if (hDebug)
+	{
+		CloseHandle(hDebug);
+		return TRUE;
+	}
+	else ShowError(GetLastError());
+	
 	return FALSE;
 }
 

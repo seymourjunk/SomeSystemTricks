@@ -7,4 +7,5 @@
 
 BOOL KillProcessByPID(DWORD pid);
 BOOL GetProcessList();
-std::wstring GetProcessNameByPID(DWORD pid);
+std::wstring GetProcessNameById(DWORD pid);
+DWORD GetProcessIdByName(std::wstring processName);

@@ -39,5 +39,6 @@ BOOL CheckHardwareBreakpoints();						// check DR0-DR3 registers
 BOOL SetInformationThread();
 void CreateThreadWithHideFromDebuggerFlag();			// code could be executed in the thread with hide from debugger flag
 BOOL CheckThreadDebugFlag();
+BOOL CheckSeDebugPrivilegeOfProcess();
 void RunAllDbgChecks();
 
