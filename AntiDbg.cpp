@@ -64,7 +64,7 @@ void SetBeingDebuggedFlag(DWORD dwFlag)
 	printf("PEB->BeingDebugged is set 0x%x\n", dwFlag);
 }
 
-BOOL CheckNtGlobalFlag()
+BOOL GetNtGlobalFlag()
 {
 	PVOID pPEB = GetPEB();
 #ifdef _WIN64
@@ -75,6 +75,19 @@ BOOL CheckNtGlobalFlag()
 
 	printf("PEB->NtGlobalFlag: 0x%x\n", globalFlag); // TODO: verbose log level
 	return (globalFlag & NT_GLOBAL_FLAG_DBG);
+}
+
+void SetNtGlobalFlag(DWORD dwFlag)
+{
+	PVOID pPEB = GetPEB();
+#ifdef _WIN64
+	PDWORD pGlobalFlag = (PDWORD)((PBYTE)pPEB + 0xbc);
+#else
+	PDWORD pGlobalFlag = (PDWORD)((PBYTE)pPEB + 0x68);
+#endif
+
+	*pGlobalFlag = dwFlag;
+	printf("PEB->NtGlobalFlag is set 0x%x\n", dwFlag);
 }
 
 BOOL CheckHeapFlags()
@@ -380,7 +393,7 @@ BOOL CheckSeDebugPrivilegeOfProcess()
 
 void RunAllDbgChecks()
 {
-	// if (CheckIsBeingDebugged() | CheckNtGlobalFlag() | CheckHeapFlags() | RunCheckRemoteDebuggerPresentWin32API() | RunNtQueryInformationProcessWin32API_DebugPort())
-	if (RunNtQueryInformationProcess_DebugObjectHandle())
+	SetNtGlobalFlag(0x0);
+	if (GetNtGlobalFlag())
 		printf("[WARNING]: process is running in a debugger\n");
 }

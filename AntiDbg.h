@@ -29,7 +29,8 @@ typedef struct _newPROCESS_BASIC_INFORMATION {
 PVOID GetPEB();
 BOOL GetBeingDebuggedFlag();							// PEB!BeingDebugged Flag
 void SetBeingDebuggedFlag(DWORD dwFlag);
-BOOL CheckNtGlobalFlag();								// PEB!NtGlobalFlag
+BOOL GetNtGlobalFlag();									// PEB!NtGlobalFlag
+void SetNtGlobalFlag(DWORD dwFlag);
 BOOL CheckHeapFlags();									// PEB!ProcessHeap
 BOOL RunCheckRemoteDebuggerPresent();					// run existing WinApi functions and return result
 BOOL RunNtQueryInformationProcess_DebugPort();			// use NtQueryInformationProcess() Win32 API function
