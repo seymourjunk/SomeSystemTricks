@@ -48,13 +48,20 @@ PVOID GetPEB()
 	return (PVOID)pPEB;
 }
 
-BOOL CheckIsBeingDebugged() // like IsDebuggerPresent()
+BOOL GetBeingDebuggedFlag() // like IsDebuggerPresent()
 {
 	PPEB pPEB = (PPEB)GetPEB();
 	DWORD isBeingDebugged = pPEB->BeingDebugged;
 
 	printf("PEB->BeingDebugged: 0x%x\n", isBeingDebugged); // TODO: verbose log level
 	return (BOOL)isBeingDebugged;
+}
+
+void SetBeingDebuggedFlag(DWORD dwFlag)
+{
+	PPEB pPEB = (PPEB)GetPEB();
+	pPEB->BeingDebugged = dwFlag;
+	printf("PEB->BeingDebugged is set 0x%x\n", dwFlag);
 }
 
 BOOL CheckNtGlobalFlag()
