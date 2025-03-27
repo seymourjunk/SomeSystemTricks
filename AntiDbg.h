@@ -42,5 +42,6 @@ BOOL SetInformationThread();
 void CreateThreadWithHideFromDebuggerFlag();			// code could be executed in the thread with hide from debugger flag
 BOOL CheckThreadDebugFlag();
 BOOL CheckSeDebugPrivilegeOfProcess();
+BOOL CheckTrapFlag();									// TF in the Flags register
 void RunAllDbgChecks();
 

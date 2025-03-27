@@ -391,9 +391,28 @@ BOOL CheckSeDebugPrivilegeOfProcess()
 	return FALSE;
 }
 
+BOOL CheckTrapFlag()	// for x86
+{
+	__try
+	{
+		__asm
+		{
+			pushfd
+			or dword ptr [esp], 0x100
+			popfd
+			nop
+		}
+
+		return TRUE;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return FALSE;
+	}
+}
+
 void RunAllDbgChecks()
 {
-	SetNtGlobalFlag(0x0);
-	if (GetNtGlobalFlag())
+	if (CheckTrapFlag())
 		printf("[WARNING]: process is running in a debugger\n");
 }
