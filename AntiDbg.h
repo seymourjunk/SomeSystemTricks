@@ -1,5 +1,4 @@
 #pragma once
-#include "Helper.h"
 #include "ProcessHelper.h"
 
 #include <iostream>
