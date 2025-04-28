@@ -1,4 +1,6 @@
 #include "SingleInstance.h"
+#include "Helper.h"
+#include <iostream>
 
 
 // TODO: find another way, not FindWindow()

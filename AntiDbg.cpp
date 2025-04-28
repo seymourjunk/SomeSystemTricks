@@ -1,4 +1,7 @@
 #include "AntiDbg.h"
+#include "Helper.h"
+#include "ProcessHelper.h"
+
 
 typedef NTSTATUS(WINAPI* PNtQueryInformationProcess)(
 	IN	HANDLE			ProcessHandle,

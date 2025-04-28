@@ -1,4 +1,6 @@
 #include "ProcessHelper.h"
+#include "Helper.h"
+#include <tlhelp32.h>
 
 
 BOOL KillProcessByPID(DWORD pid)

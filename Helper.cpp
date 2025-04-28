@@ -1,4 +1,5 @@
 #include "Helper.h"
+#include <iostream>
 
 void GetNtStatusCode(DWORD _statusValue)
 {

@@ -1,7 +1,4 @@
 #pragma once
-#include "ProcessHelper.h"
-
-#include <iostream>
 #include <Windows.h>
 #include <winternl.h>
 
